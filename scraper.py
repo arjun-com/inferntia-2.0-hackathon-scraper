@@ -33,12 +33,21 @@ class PESURedditScraper:
             for comment_thread in submission.comments:
                 doc = ""
 
-                doc += f"TITLE: ${submission.title}"
-                doc += f"\nCONTENT: ${submission.selftext.strip()}"
-                doc += f"\nPARENT COMMENT: ${comment_thread.body.strip()}"
+                doc += f"ID: {submission.id}"
+                doc += f"\nAUTHOR: {submission.author.name if submission.author else '[deleted]'}"
+                doc += f"\nURL: {submission.url}"
+                doc += f"\nPERMALINK: {submission.permalink}"
+                doc += f"\nSCORE: {submission.score}"
+                doc += f"\nUPVOTE RATIO: {submission.upvote_ratio}"
+                doc += f"\nCREATED_UTC_TIME: {submission.created_utc}"
+                doc += f"\nFLAIR: {submission.link_flair_text}"
+                doc += f"\nNSFW: {submission.over_18}"
+                doc += f"\nTITLE: {submission.title}"
+                doc += f"\nCONTENT: {submission.selftext.strip()}"
+                doc += f"\nPARENT COMMENT: {comment_thread.body.strip()}"
                 
                 for reply in comment_thread.replies.list():
-                    doc += f"\nREPLY: ${reply.body.strip()}"
+                    doc += f"\nREPLY: {reply.body.strip()}"
 
                 docs.append(doc)
 
