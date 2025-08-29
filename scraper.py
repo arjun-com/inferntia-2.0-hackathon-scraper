@@ -13,6 +13,7 @@ class PESURedditScraper:
     def scrape(self, max_posts, listing = "hot"):
         """Scrape PESU subreddit and return list of text doc objs"""
 
+        # Mapping each type of ranking/listing to its api func
         listing_to_api_call = {
             "hot": self.rd.subreddit("PESU").hot,
             "new": self.rd.subreddit("PESU").new,
@@ -27,7 +28,7 @@ class PESURedditScraper:
 
         docs = []
 
-        for submission in self.rd.subreddit("PESU").hot(limit=max_posts):
+        for submission in api_call(limit=max_posts):
             new_docs = []
 
             for comment_thread in submission.comments:
@@ -46,7 +47,7 @@ class PESURedditScraper:
                 doc += f"\nCONTENT: {submission.selftext.strip()}"
                 doc += f"\nPARENT COMMENT: {comment_thread.body.strip()}"
                 
-                for reply in comment_thread.replies.list():
+                for reply in comment_thread.replies.list(): # replies.list() returns a flattened list of replies
                     doc += f"\nREPLY: {reply.body.strip()}"
 
                 docs.append(doc)
