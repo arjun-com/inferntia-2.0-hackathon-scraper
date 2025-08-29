@@ -32,23 +32,26 @@ class PESURedditScraper:
             new_docs = []
 
             for comment_thread in submission.comments:
-                doc = ""
+                doc = {
+                    "metadata": "",
+                    "content": ""
+                }
 
-                doc += f"ID: {submission.id}"
-                doc += f"\nAUTHOR: {submission.author.name if submission.author else '[deleted]'}"
-                doc += f"\nURL: {submission.url}"
-                doc += f"\nPERMALINK: {submission.permalink}"
-                doc += f"\nSCORE: {submission.score}"
-                doc += f"\nUPVOTE RATIO: {submission.upvote_ratio}"
-                doc += f"\nCREATED_UTC_TIME: {submission.created_utc}"
-                doc += f"\nFLAIR: {submission.link_flair_text}"
-                doc += f"\nNSFW: {submission.over_18}"
-                doc += f"\nTITLE: {submission.title}"
-                doc += f"\nCONTENT: {submission.selftext.strip()}"
-                doc += f"\nPARENT COMMENT: {comment_thread.body.strip()}"
+                doc["metadata"] += "ID: {submission.id}"
+                doc["metadata"] += f"\nAUTHOR: {submission.author.name if submission.author else '[deleted]'}"
+                doc["metadata"] += f"\nURL: {submission.url}"
+                doc["metadata"] += f"\nPERMALINK: {submission.permalink}"
+                doc["metadata"] += f"\nSCORE: {submission.score}"
+                doc["metadata"] += f"\nUPVOTE RATIO: {submission.upvote_ratio}"
+                doc["metadata"] += f"\nCREATED_UTC_TIME: {submission.created_utc}"
+                doc["metadata"] += f"\nFLAIR: {submission.link_flair_text}"
+                doc["metadata"] += f"\nNSFW: {submission.over_18}"
+                doc["content"] += f"\nTITLE: {submission.title}"
+                doc["content"] += f"\nCONTENT: {submission.selftext.strip()}"
+                doc["content"] += f"\nPARENT COMMENT: {comment_thread.body.strip()}"
                 
                 for reply in comment_thread.replies.list(): # replies.list() returns a flattened list of replies
-                    doc += f"\nREPLY: {reply.body.strip()}"
+                    doc["content"] += f"\nREPLY: {reply.body.strip()}"
 
                 docs.append(doc)
 
