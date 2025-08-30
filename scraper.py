@@ -10,59 +10,40 @@ class PESURedditScraper:
             user_agent = user_agent
         )
 
-        print("Initialised PESU Reddit Scraper")
-
-    def scrape(self, max_posts_per_keyword, keywords, sorting_type = "relevance"):
+    def scrape(self, max_posts, listing = "hot"):
         """Scrape PESU subreddit and return list of text doc objs"""
 
         assert sorting_type in ["relevance", "top", "new", "hot", "comments"], "Sorting type must be chosen from: relevance, top, new, hot, comments"
 
         docs = []
-        submissions = []
 
-        print("Retrieving posts from subreddit.")
+        for submission in api_call(limit=max_posts):
+            new_docs = []
 
-        for keyword in keywords:
-            new_submissions = self.rd.subreddit("PESU").search(keyword, sort=sorting_type, limit = max_posts_per_keyword)
-            submissions.extend(new_submissions)
-
-            print(f"Total posts retrieved: {len(submissions)}")
-
-        print("Finished retrieving posts from subreddit.")
-        print("Starting to process posts.")
-
-        for i, submission in enumerate(submissions):
             for comment_thread in submission.comments:
-                content = (
-                    f"TITLE: {submission.title}\n"
-                    f"CONTENT: {submission.selftext.strip()}\n"
-                    f"PARENT COMMENT: {getattr(comment_thread, 'body', '').strip()}"
-                )
-                for reply in getattr(comment_thread, "replies", []):
-                    try:
-                        content += f"\nREPLY: {reply.body.strip()}"
-                    except Exception:
-                        continue
-
-                metadata = {
-                    "id": str(submission.id),
-                    "author": submission.author.name if submission.author else "[deleted]",
-                    "url": submission.url,
-                    "permalink": submission.permalink,
-                    "score": int(submission.score),
-                    "upvote_ratio": float(submission.upvote_ratio),
-                    "created_utc": float(submission.created_utc),
-                    "flair": submission.link_flair_text or "",
-                    "nsfw": str(submission.over_18)
+                doc = {
+                    "metadata": "",
+                    "content": ""
                 }
 
-                docs.append({
-                    "content": content,
-                    "metadata": metadata
-                })
+                doc["metadata"] += "ID: {submission.id}"
+                doc["metadata"] += f"\nAUTHOR: {submission.author.name if submission.author else '[deleted]'}"
+                doc["metadata"] += f"\nURL: {submission.url}"
+                doc["metadata"] += f"\nPERMALINK: {submission.permalink}"
+                doc["metadata"] += f"\nSCORE: {submission.score}"
+                doc["metadata"] += f"\nUPVOTE RATIO: {submission.upvote_ratio}"
+                doc["metadata"] += f"\nCREATED_UTC_TIME: {submission.created_utc}"
+                doc["metadata"] += f"\nFLAIR: {submission.link_flair_text}"
+                doc["metadata"] += f"\nNSFW: {submission.over_18}"
+                doc["content"] += f"\nTITLE: {submission.title}"
+                doc["content"] += f"\nCONTENT: {submission.selftext.strip()}"
+                doc["content"] += f"\nPARENT COMMENT: {comment_thread.body.strip()}"
+                
+                for reply in comment_thread.replies.list(): # replies.list() returns a flattened list of replies
+                    doc["content"] += f"\nREPLY: {reply.body.strip()}"
 
-            print(f"Finished process post {i + 1}")
+                docs.append(doc)
 
-        print("Processed all posts")
+            docs.extend(new_docs)
 
         return docs
